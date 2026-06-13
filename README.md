@@ -28,9 +28,9 @@ Brave is a great privacy-focused browser, but it doesn't have an official app fo
 
 ## How to Install (Android TV)
 
-1. **Download**: Download the `Keen.apk` onto your phone or computer.
-2. **Transfer**: Send the APK file to your TV using a USB drive or an app like **Send Files to TV** (available on Google Play).
-3. **Install**: On your TV, open a File Manager app, find `Keen.apk`, and install it. You may need to allow "Install from Unknown Sources" in your TV's settings.
+1. Download the Keen.apk onto your phone or computer.
+2. Send the APK file to your TV using a USB drive or an app like Send Files to TV.
+3. On your TV, open a File Manager app, find Keen.apk, and install it. You may need to allow "Install from Unknown Sources" in your TV's settings.
 
 ---
 
