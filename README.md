@@ -37,7 +37,7 @@ Brave is a great privacy-focused browser, but it doesn't have an official app fo
 ## Security & Privacy Note
 
 - **Untouched Core**: All patches are strictly for UI layout, D-pad controls, and TV optimization. Brave's core Chromium engine, sandboxing, and native ad-blocking (Brave Shields) are completely untouched.
-- **Custom Signature**: Because this is a modified build, it is signed with a custom certificate instead of Brave's official signature. This means it will not auto-update via the Google Play Store; updates must be installed manually.
+- Because this is a modified build, it is signed with a custom certificate instead of Brave's official signature. This means it will not auto-update via the Google Play Store; updates must be installed manually.
 
 ---
 
