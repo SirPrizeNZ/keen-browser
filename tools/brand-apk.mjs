@@ -95,4 +95,45 @@ for (const density of ["mdpi", "hdpi", "xhdpi", "xxhdpi", "xxxhdpi"]) {
     path.join(brandingRoot, "android_tv_res", `mipmap-${density}`, "ic_launcher.png"),
     newIcon,
   );
+  fs.copyFileSync(
+    path.join(brandingRoot, "android_tv_res", `mipmap-${density}`, "banner.png"),
+    path.join(targetDir, "banner.png"),
+  );
 }
+
+// 6. Patch AndroidManifest.xml to register as a TV app natively
+const manifestPath = path.join(decodedRoot, "AndroidManifest.xml");
+if (fs.existsSync(manifestPath)) {
+  let manifest = fs.readFileSync(manifestPath, "utf8");
+  
+  // Add TV banner to application tag
+  if (!manifest.includes("android:banner=")) {
+    manifest = manifest.replace("<application ", '<application android:banner="@mipmap/banner" ');
+  }
+  
+  // Add LEANBACK_LAUNCHER intent filter category to main activity launcher
+  const launcherIntent = '<category android:name="android.intent.category.LAUNCHER"/>';
+  const launcherIntentSpaced = '<category android:name="android.intent.category.LAUNCHER" />';
+  const leanbackIntent = '\n                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />';
+  
+  if (manifest.includes(launcherIntent) && !manifest.includes("LEANBACK_LAUNCHER")) {
+    manifest = manifest.replace(launcherIntent, launcherIntent + leanbackIntent);
+  } else if (manifest.includes(launcherIntentSpaced) && !manifest.includes("LEANBACK_LAUNCHER")) {
+    manifest = manifest.replace(launcherIntentSpaced, launcherIntentSpaced + leanbackIntent);
+  }
+  
+  fs.writeFileSync(manifestPath, manifest);
+}
+
+// 7. Register the new banner resource in public.xml
+const publicXmlPath = path.join(decodedRoot, "resources", "package_1", "res", "values", "public.xml");
+if (fs.existsSync(publicXmlPath)) {
+  let publicXml = fs.readFileSync(publicXmlPath, "utf8");
+  if (!publicXml.includes('name="banner"')) {
+    const replacement = '  <public id="0x7f110005" type="mipmap" name="banner" />\n</resources>';
+    publicXml = publicXml.replace("</resources>", replacement);
+    fs.writeFileSync(publicXmlPath, publicXml);
+  }
+}
+
+

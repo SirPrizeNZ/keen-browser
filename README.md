@@ -40,7 +40,7 @@ Get the latest pre-built APKs directly from the [GitHub Releases](https://github
 - **Onboarding Skip**: Skips the first-run setup loops (like welcome tours and default search engine prompts) and goes straight to the homepage.
 - **Popup Blocker**: Blocks intrusive popups and new tabs from opening unexpectedly on your TV.
 - **DOM Scrubber**: Injects basic script changes to clean up and scale target websites so they look better on a TV screen.
-- **TV Launcher Icon**: Includes a small companion app so Keen shows up directly in your TV's home screen apps row.
+- **TV Launcher Icon**: Includes native TV Leanback launcher configuration directly in the manifest, so Keen shows up directly in your TV's home screen apps row with a clean custom banner.
 
 ---
 
@@ -53,7 +53,8 @@ Instead, Keen uses a **patching pipeline**:
 1. We use `apktool` to decompile Brave's official APK into readable bytecode (`Smali`) and resources.
 2. We inject custom Java classes (for the virtual cursor, popup blocker, etc.) directly into the decompiled code.
 3. We override Brave's layout settings and visibility checks in smali to hide mobile-only features.
-4. We swap in the new branding assets, pack it all back up, and sign the APK.
+4. We swap in the new branding assets and copy the TV banner, then register `@mipmap/banner` and the `LEANBACK_LAUNCHER` intent category directly in the `AndroidManifest.xml`.
+5. We pack it all back up and sign the APK.
 
 This makes the project lightweight, fast to build, and much easier to update when a new Brave version comes out.
 
@@ -72,17 +73,12 @@ This makes the project lightweight, fast to build, and much easier to update whe
 ### Build Instructions
 
 1. Place the original Brave APK (named `BraveMonoarm.apk`) in the `original/` folder.
-2. Run the build scripts:
+2. Run the build script:
    ```bash
-   # Build the patched browser
    ./tools/build-patch.sh
-
-   # Build the TV Launcher companion icon
-   ./tools/build-tv-launcher.sh
    ```
-3. Get your finished APKs from the `build/` folder:
+3. Get your finished APK from the `build/` folder:
    - `build/Keen.apk`
-   - `build/Keen-Launcher.apk`
 
 ---
 
