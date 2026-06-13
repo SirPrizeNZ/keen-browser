@@ -12,10 +12,11 @@ Brave is a great privacy-focused browser, but it doesn't have an official app fo
 
 ---
 
-## What is in this project:
+## Features
 
-- **TV Remote cursor**: Move a virtual mouse pointer around using the D-pad keys on your TV remote.
-- **Single APK TV**: Merged the TV Launcher shortcut directly into the browser. It displays on your TV home screen natively with a custom icon.
+- TV remote pointer using the D-pad keys on your TV remote.
+- Added auto ruthless ad pop up / ad new tab blocking capabilities.
+- Kept all the awesome Brave ad blocking features.
 
 ---
 
