@@ -8,6 +8,27 @@ Brave is a great privacy-focused browser, but it doesn't have an official app fo
 
 ---
 
+## Download
+
+Get the latest pre-built APKs directly from the [GitHub Releases](https://github.com/SirPrizeNZ/keen-browser/releases) page.
+
+---
+
+## How to Install (For TV Users)
+
+1. **Download**: Download the `Keen.apk` (and `Keen-Launcher.apk` if you want a TV home screen icon) onto your phone or computer.
+2. **Transfer**: Send the APK files to your TV using a USB drive or an app like **Send Files to TV** (available on Google Play).
+3. **Install**: On your TV, open a File Manager app, find the downloaded APKs, and install them. You may need to allow "Install from Unknown Sources" in your TV's security settings.
+
+---
+
+## Security & Privacy Note
+
+- **Untouched Core**: All patches are strictly for UI layout, D-pad controls, and TV optimization. Brave's core Chromium engine, sandboxing, and native ad-blocking (Brave Shields) are completely untouched.
+- **Custom Signature**: Because this is a modified build, it is signed with a custom certificate instead of Brave's official signature. This means it will not auto-update via the Google Play Store; updates must be installed manually.
+
+---
+
 ## Features
 
 - **Virtual Mouse Cursor**: Move the pointer around using your D-pad remote.
@@ -38,7 +59,7 @@ This makes the project lightweight, fast to build, and much easier to update whe
 
 ---
 
-## Setup & Building
+## Building from Source
 
 ### Prerequisites
 - macOS or Linux
@@ -62,14 +83,6 @@ This makes the project lightweight, fast to build, and much easier to update whe
 3. Get your finished APKs from the `build/` folder:
    - `build/Keen.apk`
    - `build/Keen-Launcher.apk`
-
-### Install to TV
-Deploy them directly to your TV over ADB:
-```bash
-adb connect <your-tv-ip>
-adb install -r build/Keen.apk
-adb install -r build/Keen-Launcher.apk
-```
 
 ---
 
