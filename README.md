@@ -1,17 +1,10 @@
-<pre>
-<font color="#fb5416">
- █████   ████ ██████████ ██████████ ██████   █████
-░░███   ███░ ░░███░░░░░█░░███░░░░░█░░██████ ░░███
- ░███  ███    ░███  █ ░  ░███  █ ░  ░███░███ ░███
- ░███████     ░██████    ░██████    ░███░░███░███
- ░███░░███    ░███░░█    ░███░░█    ░███ ░░██████
- ░███ ░░███   ░███ ░   █ ░███ ░   █ ░███  ░░█████
- █████ ░░████ ██████████ ██████████ █████  ░░█████
-░░░░░   ░░░░ ░░░░░░░░░░ ░░░░░░░░░░ ░░░░░    ░░░░░
-</font>
-</pre>
+<p align="center">
+  <img src="branding/extras/keen_ascii_orange.png" alt="KEEN" width="600">
+</p>
 
-**Keen Browser. Browse Untamed.**
+<p align="center">
+  <b>Keen Browser. Browse Untamed.</b>
+</p>
 
 Keen is a custom version of Brave Browser made for Android TV. 
 
@@ -28,11 +21,11 @@ Brave is a great privacy-focused browser, but it doesn't have an official app fo
 
 ## Download
 
-Get the latest pre-built APK directly from the [GitHub Releases](https://github.com/SirPrizeNZ/keen-browser/releases) page.
+[Download Keen.apk (v1.0.0)](https://github.com/SirPrizeNZ/keen-browser/releases/download/v1.0.0/Keen.apk)
 
 ---
 
-## How to Install (For TV Users)
+## How to Install (Android TV)
 
 1. **Download**: Download the `Keen.apk` onto your phone or computer.
 2. **Transfer**: Send the APK file to your TV using a USB drive or an app like **Send Files to TV** (available on Google Play).
@@ -87,4 +80,4 @@ Instead, Keen uses a **patching pipeline**:
 
 Built by **SirPrizeNZ** (https://github.com/SirPrizeNZ).
 
-*Disclaimer: This is an unofficial community port of Brave Browser. It is not affiliated with or endorsed by Brave Software Inc.*
+*Disclaimer: This is an unofficial community port of Brave Browser. It is not affiliated with or endorsed by Brave Software Inc. Brave, if you are reading this, please release an official Android TV compatible version.*
