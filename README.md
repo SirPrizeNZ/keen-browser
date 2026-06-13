@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="branding/extras/keen_ascii_orange.png" alt="KEEN" width="600">
+  <img src="branding/master/logo_clean_transparent_cropped.png" alt="Keen Logo" width="180">
 </p>
 
 <p align="center">
