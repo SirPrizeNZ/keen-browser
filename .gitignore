@@ -1,0 +1,7 @@
+analysis/
+build/
+original/
+tools/lib/
+.keys/
+.tmp.driveupload/
+.tmp.drivedownload/

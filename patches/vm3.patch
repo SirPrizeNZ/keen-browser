@@ -1,0 +1,19 @@
+--- a/smali/vm3.smali
++++ b/smali/vm3.smali
+@@ -27,6 +27,17 @@
+ .method public dispatchKeyEvent(Landroid/view/KeyEvent;)Z
+     .locals 1
+ 
++    invoke-static {p0, p1}, Lcom/brave/tv/TvCursorController;->handle(Landroid/app/Activity;Landroid/view/KeyEvent;)Z
++
++    move-result v0
++
++    if-eqz v0, :tv_cursor_not_handled
++
++    const/4 v0, 0x1
++
++    return v0
++
++    :tv_cursor_not_handled
+     .line 1
+     invoke-virtual {p1}, Ljava/lang/Object;->getClass()Ljava/lang/Class;

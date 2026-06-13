@@ -1,0 +1,13 @@
+--- a/smali/zf6.smali
++++ b/smali/zf6.smali
+@@ -118,5 +118,11 @@
+  .method public static b(ZZ)Z
+      .locals 3
+  
++     # fre_sequencer_bypass
++     const/4 v0, 0x0
++ 
++     return v0
++ 
+      .line 1
+      invoke-static {}, Lorg/chromium/base/CommandLine;->c()V

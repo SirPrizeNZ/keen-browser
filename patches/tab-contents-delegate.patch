@@ -1,0 +1,23 @@
+--- a/smali_classes2/org/chromium/chrome/browser/tab/TabWebContentsDelegateAndroidImpl.smali
++++ b/smali_classes2/org/chromium/chrome/browser/tab/TabWebContentsDelegateAndroidImpl.smali
+@@ -266,8 +266,20 @@
+ .end method
+ 
+ .method public final addNewContents(Lorg/chromium/content_public/browser/WebContents;Lorg/chromium/content_public/browser/WebContents;Lorg/chromium/url/GURL;ILorg/chromium/chrome/browser/util/WindowFeatures;ZLorg/chromium/chrome/browser/util/PictureInPictureWindowOptions;)Z
+-    .locals 0
++    .locals 1
+ 
++    invoke-static/range {p1 .. p6}, Lcom/brave/tv/TvCursorController;->shouldAllowNewContents(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;IZ)Z
++
++    move-result v0
++
++    if-nez v0, :cond_blocked
++
++    const/4 v0, 0x0
++
++    return v0
++
++    :cond_blocked
+     .line 1
+     iget-object p0, p0, Lorg/chromium/chrome/browser/tab/TabWebContentsDelegateAndroidImpl;->t:Lazg;
+ 

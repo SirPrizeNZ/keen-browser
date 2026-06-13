@@ -1,0 +1,105 @@
+{
+  "source": "Gemini_Generated_Image_3230nk3230nk3230.png",
+  "master_crop_size_px": [
+    683,
+    784
+  ],
+  "assets": [
+    {
+      "path": "android_tv_res/mipmap-mdpi/ic_launcher.png",
+      "size": [
+        80,
+        80
+      ],
+      "type": "launcher_icon_1x1"
+    },
+    {
+      "path": "android_tv_res/mipmap-hdpi/ic_launcher.png",
+      "size": [
+        120,
+        120
+      ],
+      "type": "launcher_icon_1x1"
+    },
+    {
+      "path": "android_tv_res/mipmap-xhdpi/ic_launcher.png",
+      "size": [
+        160,
+        160
+      ],
+      "type": "launcher_icon_1x1"
+    },
+    {
+      "path": "android_tv_res/mipmap-xxhdpi/ic_launcher.png",
+      "size": [
+        240,
+        240
+      ],
+      "type": "launcher_icon_1x1"
+    },
+    {
+      "path": "android_tv_res/mipmap-xxxhdpi/ic_launcher.png",
+      "size": [
+        320,
+        320
+      ],
+      "type": "launcher_icon_1x1"
+    },
+    {
+      "path": "android_tv_res/mipmap-mdpi/banner.png",
+      "size": [
+        160,
+        90
+      ],
+      "type": "banner_16x9"
+    },
+    {
+      "path": "android_tv_res/mipmap-hdpi/banner.png",
+      "size": [
+        240,
+        135
+      ],
+      "type": "banner_16x9"
+    },
+    {
+      "path": "android_tv_res/mipmap-xhdpi/banner.png",
+      "size": [
+        320,
+        180
+      ],
+      "type": "banner_16x9"
+    },
+    {
+      "path": "android_tv_res/mipmap-xxhdpi/banner.png",
+      "size": [
+        480,
+        270
+      ],
+      "type": "banner_16x9"
+    },
+    {
+      "path": "android_tv_res/mipmap-xxxhdpi/banner.png",
+      "size": [
+        640,
+        360
+      ],
+      "type": "banner_16x9"
+    },
+    {
+      "path": "extras/google_play_icon_512x512_transparent.png",
+      "size": [
+        512,
+        512
+      ],
+      "type": "google_play_listing_icon"
+    },
+    {
+      "path": "extras/banner_1280x720_transparent.png",
+      "size": [
+        1280,
+        720
+      ],
+      "type": "high_res_banner_16x9"
+    }
+  ]
+}
