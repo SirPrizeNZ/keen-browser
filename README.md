@@ -26,6 +26,12 @@ Brave is a great privacy-focused browser, but it doesn't have an official app fo
 
 ---
 
+## Compatibility
+
+- **Confirmed working on**: Xiaomi TV Box S (2nd Gen) - Android 14
+
+---
+
 ## How to Install (Android TV)
 
 1. Download the Keen.apk onto your phone or computer.
