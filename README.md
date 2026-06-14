@@ -26,9 +26,39 @@ Brave is a great privacy-focused browser, but it doesn't have an official app fo
 
 ---
 
-## Compatibility
+## Compatibility & Specs
 
-- **Confirmed working on**: Xiaomi TV Box S (2nd Gen) - Android 14
+- **Status**: Alpha / Experimental (Concept Build)
+- **Tested on**: Xiaomi TV Box S (2nd Gen) - Android 14
+- **Base APK**: Brave `v1.93.61` (`com.brave.browser_nightly`) 
+  - *SHA-256*: `bc7202f511a37e7046607a053df5317309442f8439f1b11fed3f1ded09cd2261`
+- **Keen APK**: 
+  - *SHA-256*: `bc6573cb8d612e65cfc76d39ae8532fe140567f158cf590c948749372add0e81`
+
+---
+
+## Technical Overview
+
+### What Changed
+- **D-pad cursor**: Native pointer simulation mapped directly to your D-pad remote.
+- **TV launcher banner**: Natively integrated Leanback launcher category and custom TV banner resources.
+- **UI cleanup**: Stripped out mobile-only menu items (Brave Rewards, News, VPN, Wallet, Leo AI) to prevent D-pad remote focus hangs.
+- **Popup hooks**: Added logic to intercept and suppress unsolicited redirects and new-tab requests.
+
+### What Did Not Change
+- Core Chromium rendering engine.
+- Brave Shields and native adblock lists.
+
+### Key Permissions
+- `INTERNET` (Web access)
+- `ACCESS_NETWORK_STATE` & `ACCESS_WIFI_STATE` (Connection checks)
+- `READ_EXTERNAL_STORAGE` & `WRITE_EXTERNAL_STORAGE` (Downloads support)
+- `RECORD_AUDIO` & `CAMERA` (Web audio/video features)
+
+### Known Issues
+- **Manual updates**: Since this is a custom patched build, it won't auto-update from the Play Store.
+- **Custom signing**: Will trigger an Android security warning on installation.
+- **Limited device testing**: Only verified on Xiaomi TV Box S (2nd Gen) running Android 14.
 
 ---
 
