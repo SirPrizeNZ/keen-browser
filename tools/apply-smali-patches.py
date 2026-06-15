@@ -35,13 +35,14 @@ def apply_replacement(filepath, target, replacement):
     print(f"Successfully patched {os.path.basename(filepath)}")
 
 def main():
-    # 1. Patch vm3.smali (D-pad key dispatcher hook)
-    vm3_path = os.path.join(APKTOOL_TREE, "smali", "vm3.smali")
+    # 1. Patch jn3.smali (D-pad key dispatcher hook)
+    vm3_path = os.path.join(APKTOOL_TREE, "smali", "jn3.smali")
     vm3_target = (
         ".method public dispatchKeyEvent(Landroid/view/KeyEvent;)Z\n"
         "    .locals 1\n"
         "\n"
-        "    .line 1"
+        "    .line 1\n"
+        "    invoke-virtual {p0}"
     )
     vm3_replacement = (
         ".method public dispatchKeyEvent(Landroid/view/KeyEvent;)Z\n"
@@ -58,30 +59,32 @@ def main():
         "    return v0\n"
         "\n"
         "    :tv_cursor_not_handled\n"
-        "    .line 1"
+        "    .line 1\n"
+        "    invoke-virtual {p0}"
     )
     apply_replacement(vm3_path, vm3_target, vm3_replacement)
 
-    # 2. Patch qa2.smali (Popup window mouse hook)
-    qa2_path = os.path.join(APKTOOL_TREE, "smali_classes2", "qa2.smali")
+    # 2. Patch k72.smali (Popup window mouse hook)
+    qa2_path = os.path.join(APKTOOL_TREE, "smali_classes2", "k72.smali")
     qa2_target = (
-        "    invoke-virtual {p0}, Lqa2;->q()V"
+        "    invoke-virtual {v0, v1}, Lk72;->k(I)V"
     )
     qa2_replacement = (
-        "    invoke-virtual {p0}, Lqa2;->q()V\n"
+        "    invoke-virtual {v0, v1}, Lk72;->k(I)V\n"
         "\n"
-        "    iget-object v0, p0, Lqa2;->b:Landroid/content/Context;\n"
+        "    # TvCursor popup attachment hook\n"
+        "    iget-object v1, v0, Lk72;->a:Landroid/content/Context;\n"
         "\n"
-        "    check-cast v0, Landroid/app/Activity;\n"
+        "    check-cast v1, Landroid/app/Activity;\n"
         "\n"
-        "    iget-object v2, p0, Lqa2;->d:Landroid/view/View;\n"
+        "    iget-object v3, v0, Lk72;->j:Landroid/view/View;\n"
         "\n"
-        "    invoke-static {v0, v2, v1}, Lcom/brave/tv/TvCursorController;->attachPopup(Landroid/app/Activity;Landroid/view/View;Landroid/widget/PopupWindow;)V"
+        "    invoke-static {v1, v3, v2}, Lcom/brave/tv/TvCursorController;->attachPopup(Landroid/app/Activity;Landroid/view/View;Landroid/widget/PopupWindow;)V"
     )
     apply_replacement(qa2_path, qa2_target, qa2_replacement)
 
-    # 3. Patch zf6.smali (First-run engine bypass sequencer sequencer_bypass)
-    zf6_path = os.path.join(APKTOOL_TREE, "smali", "zf6.smali")
+    # 3. Patch gg6.smali (First-run engine bypass sequencer)
+    zf6_path = os.path.join(APKTOOL_TREE, "smali", "gg6.smali")
     zf6_target = (
         ".method public static b(ZZ)Z\n"
         "    .locals 3\n"
@@ -133,14 +136,14 @@ def main():
     )
     apply_replacement(delegate_path, delegate_target, delegate_replacement)
 
-    # 5. Patch s82.smali to hide VPN, Rewards, Leo AI, and Wallet menu items natively
-    s82_path = os.path.join(APKTOOL_TREE, "smali_classes2", "s82.smali")
+    # 5. Patch k92.smali to hide VPN, Rewards, Leo AI, and Wallet menu items natively
+    s82_path = os.path.join(APKTOOL_TREE, "smali_classes2", "k92.smali")
     s82_target = (
         ".method public final get()Ljava/lang/Object;\n"
         "    .locals 9\n"
         "\n"
         "    .line 1\n"
-        "    iget v0, p0, Ls82;->q:I\n"
+        "    iget v0, p0, Lk92;->q:I\n"
         "\n"
         "    .line 2\n"
         "    .line 3\n"
@@ -157,7 +160,7 @@ def main():
         "    .locals 9\n"
         "\n"
         "    .line 1\n"
-        "    iget v0, p0, Ls82;->q:I\n"
+        "    iget v0, p0, Lk92;->q:I\n"
         "\n"
         "    # Intercept and return false for Wallet, Leo AI, Rewards, and VPN\n"
         "    const/4 v1, 0x1\n"
@@ -200,14 +203,14 @@ def main():
     )
     apply_replacement(s82_path, s82_target, s82_replacement)
 
-    # 5b. Patch t82.smali to return false for all cases (Rewards, Wallet, News visibility)
-    t82_path = os.path.join(APKTOOL_TREE, "smali_classes2", "t82.smali")
+    # 5b. Patch l92.smali to return false for all cases (Rewards, Wallet, News visibility)
+    t82_path = os.path.join(APKTOOL_TREE, "smali_classes2", "l92.smali")
     t82_target = (
         ".method public final get()Ljava/lang/Object;\n"
         "    .locals 0\n"
         "\n"
         "    .line 1\n"
-        "    iget p0, p0, Lt82;->q:I\n"
+        "    iget p0, p0, Ll92;->q:I\n"
         "\n"
         "    .line 2\n"
         "    .line 3\n"
@@ -222,7 +225,7 @@ def main():
         "    return-object v0\n"
         "\n"
         "    .line 1\n"
-        "    iget p0, p0, Lt82;->q:I\n"
+        "    iget p0, p0, Ll92;->q:I\n"
         "\n"
         "    .line 2\n"
         "    .line 3\n"
@@ -230,23 +233,24 @@ def main():
     )
     apply_replacement(t82_path, t82_target, t82_replacement)
 
-    # 5c. Patch v82.smali to truncate S() method (removes mobile-only menu items)
-    v82_path = os.path.join(APKTOOL_TREE, "smali_classes2", "v82.smali")
+    # 5c. Patch n92.smali to truncate e() method (removes mobile-only menu items)
+    v82_path = os.path.join(APKTOOL_TREE, "smali_classes2", "n92.smali")
     v82_target = (
-        "    .line 244\n"
-        "    .line 245\n"
-        "    .line 246\n"
-        "    :cond_3\n"
-        "    new-instance v2, Lfc9;"
+        "    invoke-virtual {v7, v2}, Lx09;->D(Ljava/lang/Object;)V\n"
+        "\n"
+        "    .line 2642\n"
+        "    .line 2643\n"
+        "    .line 2644\n"
+        "    :cond_5e"
     )
     v82_replacement = (
-        "    .line 244\n"
-        "    .line 245\n"
-        "    .line 246\n"
-        "    :cond_3\n"
-        "    return-object v0\n"
+        "    invoke-virtual {v7, v2}, Lx09;->D(Ljava/lang/Object;)V\n"
         "\n"
-        "    new-instance v2, Lfc9;"
+        "    .line 2642\n"
+        "    .line 2643\n"
+        "    .line 2644\n"
+        "    :cond_5e\n"
+        "    return-object v7"
     )
     apply_replacement(v82_path, v82_target, v82_replacement)
 
@@ -259,21 +263,21 @@ def main():
     )
     observer_target = (
         ".method public final didFinishNavigationInPrimaryMainFrame(Lorg/chromium/content_public/browser/NavigationHandle;)V\n"
-        "    .locals 3\n"
+        "    .locals 2\n"
         "\n"
         "    .line 1\n"
-        "    invoke-virtual {p0}, Lorg/chromium/content/browser/webcontents/WebContentsObserverProxy;->k()V"
+        "    invoke-virtual {p0}, Lorg/chromium/content/browser/webcontents/WebContentsObserverProxy;->j()V"
     )
     observer_replacement = (
         ".method public final didFinishNavigationInPrimaryMainFrame(Lorg/chromium/content_public/browser/NavigationHandle;)V\n"
-        "    .locals 3\n"
+        "    .locals 2\n"
         "\n"
         "    # Inject DOM Scrubber into WebContents when navigation finishes\n"
         "    iget-object v0, p0, Lorg/chromium/content/browser/webcontents/WebContentsObserverProxy;->q:Lorg/chromium/content_public/browser/WebContents;\n"
         "    invoke-static {v0}, Lcom/brave/tv/TvPopupBlocker;->injectDomScrubber(Ljava/lang/Object;)V\n"
         "\n"
         "    .line 1\n"
-        "    invoke-virtual {p0}, Lorg/chromium/content/browser/webcontents/WebContentsObserverProxy;->k()V"
+        "    invoke-virtual {p0}, Lorg/chromium/content/browser/webcontents/WebContentsObserverProxy;->j()V"
     )
     apply_replacement(observer_path, observer_target, observer_replacement)
 
