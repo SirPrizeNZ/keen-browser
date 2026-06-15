@@ -10,7 +10,6 @@ import java.util.Set;
 /**
  * Strict Popup Lock engine for Keen Browser on Android TV.
  * Uses behavioural verification gates to block malicious redirects and overlays.
- * Note: Written strictly using British spelling to comply with local style guidelines.
  */
 public final class TvPopupBlocker {
     private static final String PREFS_NAME = "keen_strict_popup_lock_prefs";
