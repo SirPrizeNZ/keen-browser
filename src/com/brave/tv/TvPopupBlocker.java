@@ -102,6 +102,10 @@ public final class TvPopupBlocker {
                 if (isGlobalAuthHost(targetHost)) {
                     return true;
                 }
+                // Allow user-initiated link clicks (e.g. clicking external links on directory sites)
+                if (userGesture) {
+                    return true;
+                }
                 System.out.println("[Strict Lock] Blocked window request: Context-Escape Gate (cross-site mismatch). Parent: " + parentRoot + ", Target: " + targetRoot);
                 return false;
             }

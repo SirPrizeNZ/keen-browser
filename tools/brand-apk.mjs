@@ -102,6 +102,8 @@ for (const density of ["mdpi", "hdpi", "xhdpi", "xxhdpi", "xxxhdpi"]) {
 }
 
 // 6. Patch AndroidManifest.xml to register as a TV app natively
+// Disabling direct TV app registration for com.brave.browser so only the helper launcher package shows on Leanback/Google TV Home launcher.
+/*
 const manifestPath = path.join(decodedRoot, "AndroidManifest.xml");
 if (fs.existsSync(manifestPath)) {
   let manifest = fs.readFileSync(manifestPath, "utf8");
@@ -124,6 +126,7 @@ if (fs.existsSync(manifestPath)) {
   
   fs.writeFileSync(manifestPath, manifest);
 }
+*/
 
 // 7. Register the new banner resource in public.xml
 const publicXmlPath = path.join(decodedRoot, "resources", "package_1", "res", "values", "public.xml");
