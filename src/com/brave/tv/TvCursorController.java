@@ -17,6 +17,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
 import android.widget.PopupWindow;
+import android.widget.ScrollView;
 import android.widget.Toast;
 
 import java.util.WeakHashMap;
@@ -211,7 +212,11 @@ public final class TvCursorController {
             return cursor;
         }
         cursor = new CursorView(activity, popupRoot);
-        popupRoot.addView(cursor, new ViewGroup.LayoutParams(
+        ViewGroup cursorHost = popupRoot;
+        if (popupRoot instanceof ScrollView && popupRoot.getParent() instanceof ViewGroup) {
+            cursorHost = (ViewGroup) popupRoot.getParent();
+        }
+        cursorHost.addView(cursor, new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         POPUP_CURSORS.put(popupRoot, cursor);
         cursor.bringToFront();

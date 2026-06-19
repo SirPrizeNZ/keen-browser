@@ -23,7 +23,7 @@ Brave is a great privacy-focused browser, but it doesn't have an official app fo
 
 ## Download
 
-[Download Keen.apk (v1.2.1-alpha - 2026-06-19)](https://github.com/SirPrizeNZ/keen-browser/releases/download/v1.2.1-alpha/Keen.apk)
+[Download Keen.apk (v1.2.2-alpha - 2026-06-19)](https://github.com/SirPrizeNZ/keen-browser/releases/download/v1.2.2-alpha/Keen.apk)
 
 ---
 
@@ -34,7 +34,7 @@ Brave is a great privacy-focused browser, but it doesn't have an official app fo
 - **Base APK**: Brave Stable `v1.91.172` (`com.brave.browser` - Monoarm armeabi-v7a)
   - *SHA-256*: `39c8fd9eb90a1b8e10a030ed9c682f6637bb71ea45bb2c11dd3e6e47055fab39`
 - **Keen APK**: 
-  - *SHA-256*: `b7c257c9f9ec4a8da883f1f1887831014cb00425354e41e48aa310f64ab2cfa1`
+  - *SHA-256*: `e02022d1186794c54515d23cce2ef007bfbd73e4f5322b253d8c2dde77e9bf25`
 
 ---
 
