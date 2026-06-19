@@ -263,11 +263,20 @@ public final class TvPopupBlocker {
             return isNewWindow ? PopupDecision.LOAD_CURRENT_TAB : PopupDecision.ALLOW;
         }
 
+        if (isLauncherHost(parentRoot)
+                && sNavigationState.currentMode == TvNavigationMode.CONTENT_LOCKDOWN
+                && targetRoot.equals(sNavigationState.currentContentRoot)) {
+            sNavigationState.lastDecisionReason = "launcher-approved-current-tab-handoff";
+            return PopupDecision.ALLOW;
+        }
+
         if (sNavigationState.currentMode == TvNavigationMode.LAUNCHER || isLauncherHost(parentRoot)) {
-            if (explicitVisibleAnchor) {
+            if (explicitVisibleAnchor || (isNewWindow && hasUserGesture)) {
                 sNavigationState.currentMode = TvNavigationMode.CONTENT_LOCKDOWN;
                 sNavigationState.currentContentRoot = targetRoot;
-                sNavigationState.lastDecisionReason = "launcher-explicit-anchor-navigation";
+                sNavigationState.lastDecisionReason = explicitVisibleAnchor
+                        ? "launcher-explicit-anchor-navigation"
+                        : "launcher-user-selected-new-window";
                 return PopupDecision.LOAD_CURRENT_TAB;
             }
 
