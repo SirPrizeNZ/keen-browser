@@ -6,7 +6,7 @@
   <b>Keen Browser. Browse Untamed.</b>
 </p>
 
-Keen is a custom version of Brave Browser made for Android TV. 
+Keen is Brave Browser rebuilt for Android TV.
 
 Brave is a great privacy-focused browser, but it doesn't have an official app for Android TV. Keen fixes that by adding TV remote navigation and cleaning up the layout for the big screen, all while keeping Brave's ad-blocking and privacy features intact.
 
@@ -14,15 +14,16 @@ Brave is a great privacy-focused browser, but it doesn't have an official app fo
 
 ## Features
 
-- TV remote pointer using the D-pad keys on your TV remote.
-- Added auto ruthless ad pop up / ad new tab blocking capabilities.
-- Kept all the awesome Brave ad blocking features.
+- D-pad pointer with smooth movement, matched edge scrolling, and keyboard-aware input.
+- Content-host lockdown blocks hijacked popups and unrelated full-page redirects.
+- Remote-native Android dialogs and controls.
+- Brave Shields and native ad blocking remain intact.
 
 ---
 
 ## Download
 
-[Download Keen.apk (v1.1.0-alpha - 2026-06-15)](https://github.com/SirPrizeNZ/keen-browser/releases/download/v1.1.0-alpha/Keen.apk)
+[Download Keen.apk (v1.2.0-alpha - 2026-06-19)](https://github.com/SirPrizeNZ/keen-browser/releases/download/v1.2.0-alpha/Keen.apk)
 
 ---
 
@@ -33,7 +34,7 @@ Brave is a great privacy-focused browser, but it doesn't have an official app fo
 - **Base APK**: Brave Stable `v1.91.172` (`com.brave.browser` - Monoarm armeabi-v7a)
   - *SHA-256*: `39c8fd9eb90a1b8e10a030ed9c682f6637bb71ea45bb2c11dd3e6e47055fab39`
 - **Keen APK**: 
-  - *SHA-256*: `c3a3bf6104ff10a847cd3d732079f7f4127e9172bf8c64126f2328670c0f9ff4`
+  - *SHA-256*: `a85e6637073d01ff1b092021079bb7daf5646e9239cb98d496c5e75409e76055`
 
 ---
 
@@ -43,7 +44,7 @@ Brave is a great privacy-focused browser, but it doesn't have an official app fo
 - **D-pad cursor**: Native pointer simulation mapped directly to your D-pad remote.
 - **TV launcher banner**: Natively integrated Leanback launcher category and custom TV banner resources.
 - **UI cleanup**: Stripped out mobile-only menu items (Brave Rewards, News, VPN, Wallet, Leo AI) to prevent D-pad remote focus hangs.
-- **Popup hooks**: Added logic to intercept and suppress unsolicited redirects and new-tab requests.
+- **Navigation lockdown**: Content sites stay on their own host. Cross-site popup hijacks are blocked at Chromium's native navigation hooks.
 
 ### What Did Not Change
 - Core Chromium rendering engine.

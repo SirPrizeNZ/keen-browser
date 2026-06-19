@@ -84,7 +84,10 @@ public final class TvCursorController {
 
         if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER || keyCode == KeyEvent.KEYCODE_ENTER) {
             if (event.getRepeatCount() > 0) return true;
-            if (event.getAction() == KeyEvent.ACTION_DOWN) cursor.click(MotionEvent.ACTION_DOWN);
+            if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                TvPopupBlocker.recordNativeAction();
+                cursor.click(MotionEvent.ACTION_DOWN);
+            }
             if (event.getAction() == KeyEvent.ACTION_UP) cursor.click(MotionEvent.ACTION_UP);
             return true;
         }

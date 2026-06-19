@@ -272,14 +272,46 @@ def main():
         ".method public final didFinishNavigationInPrimaryMainFrame(Lorg/chromium/content_public/browser/NavigationHandle;)V\n"
         "    .locals 2\n"
         "\n"
-        "    # Inject DOM Scrubber into WebContents when navigation finishes\n"
+        "    # Inject DOM Scrubber and update navigation state when navigation finishes\n"
         "    iget-object v0, p0, Lorg/chromium/content/browser/webcontents/WebContentsObserverProxy;->q:Lorg/chromium/content_public/browser/WebContents;\n"
-        "    invoke-static {v0}, Lcom/brave/tv/TvPopupBlocker;->injectDomScrubber(Ljava/lang/Object;)V\n"
+        "    invoke-static {v0}, Lcom/brave/tv/TvPopupBlocker;->onMainFrameNavigationFinished(Ljava/lang/Object;)V\n"
         "\n"
         "    .line 1\n"
         "    invoke-virtual {p0}, Lorg/chromium/content/browser/webcontents/WebContentsObserverProxy;->j()V"
     )
     apply_replacement(observer_path, observer_target, observer_replacement)
+
+    # 7. Patch hs1.smali (shouldOverrideUrlLoading same-tab blocker hook to TvPopupBlocker)
+    hs1_path = os.path.join(
+        APKTOOL_TREE,
+        "smali_classes2",
+        "hs1.smali"
+    )
+    hs1_target = (
+        ".method public final w(Lf16;)Lz06;\n"
+        "    .locals 37\n"
+        "\n"
+        "    .line 1"
+    )
+    hs1_replacement = (
+        ".method public final w(Lf16;)Lz06;\n"
+        "    .locals 37\n"
+        "\n"
+        "    # Hook to TvPopupBlocker.shouldOverrideUrlLoading\n"
+        "    invoke-static/range {p0 .. p1}, Lcom/brave/tv/TvPopupBlocker;->shouldOverrideUrlLoading(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;\n"
+        "\n"
+        "    move-result-object v0\n"
+        "\n"
+        "    if-eqz v0, :cond_hook_bypass\n"
+        "\n"
+        "    check-cast v0, Lz06;\n"
+        "\n"
+        "    return-object v0\n"
+        "\n"
+        "    :cond_hook_bypass\n"
+        "    .line 1"
+    )
+    apply_replacement(hs1_path, hs1_target, hs1_replacement)
 
 if __name__ == "__main__":
     main()
