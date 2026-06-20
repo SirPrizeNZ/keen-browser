@@ -7,65 +7,14 @@ import android.util.Log;
 import java.util.Locale;
 
 /**
- * Central decision engine for popup / navigation quarantine on Android TV.
+ * Central decision engine for navigation quarantine on Android TV.
+ * Uses KeenRiskScorer for threat-level-based decisions instead of
+ * absolute cross-site lockdown.
  */
 public final class TvPopupBlocker {
     private static final TvIntentLedger sIntentLedger = new TvIntentLedger();
     private static final TvPopupFeedback sFeedback = new TvPopupFeedback();
     private static final TvNavigationState sNavigationState = new TvNavigationState();
-
-    // Lightweight JS utility injected on page load
-    public static final String DOM_SCRUBBER_JS =
-        "(function () {" +
-        "  if (window.__TV_INTENT_LOCK_INSTALLED__) return;" +
-        "  window.__TV_INTENT_LOCK_INSTALLED__ = true;" +
-        "  function normaliseTargets() {" +
-        "    try {" +
-        "      document.querySelectorAll('a[target], form[target], base[target]').forEach(function (el) {" +
-        "        var t = el.getAttribute('target');" +
-        "        if (t && t !== '_self' && t !== '_parent' && t !== '_top') {" +
-        "          el.setAttribute('target', '_self');" +
-        "        }" +
-        "      });" +
-        "    } catch (e) {}" +
-        "  }" +
-        "  function findAnchor(node) {" +
-        "    while (node && node !== document && node.tagName !== 'A') {" +
-        "      node = node.parentNode;" +
-        "    }" +
-        "    return node && node.tagName === 'A' ? node : null;" +
-        "  }" +
-        "  document.addEventListener('click', function (e) {" +
-        "    try {" +
-        "      var a = findAnchor(e.target);" +
-        "      if (a && a.href) {" +
-        "        a.setAttribute('target', '_self');" +
-        "        if (window.TvIntent) window.TvIntent.recordAnchorIntent(a.href, Date.now());" +
-        "      } else {" +
-        "        if (window.TvIntent) window.TvIntent.recordNonAnchorIntent(Date.now());" +
-        "      }" +
-        "    } catch (err) {}" +
-        "  }, true);" +
-        "  document.addEventListener('focusin', function (e) {" +
-        "    try {" +
-        "      var a = findAnchor(e.target);" +
-        "      if (a && a.href && window.TvIntent) {" +
-        "        window.TvIntent.recordAnchorIntent(a.href, Date.now());" +
-        "      }" +
-        "    } catch (err) {}" +
-        "  }, true);" +
-        "  normaliseTargets();" +
-        "  try {" +
-        "    new MutationObserver(function () {" +
-        "      normaliseTargets();" +
-        "    }).observe(document.documentElement || document, {" +
-        "      childList: true," +
-        "      subtree: true," +
-        "      attributes: true," +
-        "      attributeFilter: ['target']" +
-        "    });" +
-        "  } catch (e) {}" +
-        "})();";
 
     private TvPopupBlocker() {}
 
@@ -219,82 +168,154 @@ public final class TvPopupBlocker {
     ) {
         String parentRoot = root(parentUrl);
         String targetRoot = root(targetUrl);
+        int riskScore = KeenRiskScorer.getScore(parentRoot);
+        boolean sameSite = !parentRoot.isEmpty() && parentRoot.equals(targetRoot);
 
+        // --- Gate 1: empty/null targets are always blocked ---
         if (targetUrl == null || targetUrl.trim().isEmpty()) {
             sNavigationState.lastDecisionReason = "empty-target";
+            KeenDebugLog.blocked(parentRoot, "empty-target", "empty-target", riskScore);
             return PopupDecision.BLOCK;
         }
 
+        // --- Gate 2: sub-frame navigations in same tab are allowed ---
         if (!isMainFrame && !isNewWindow) {
             return PopupDecision.ALLOW;
         }
 
-        if (isAuthHost(targetRoot)) {
-            sNavigationState.lastDecisionReason = "auth-host-exception";
-            return PopupDecision.LOAD_CURRENT_TAB;
-        }
-
-        // The visible parent URL is authoritative. Observer callbacks can be late or absent,
-        // so a content host must never inherit stale launcher privileges.
-        if (!parentRoot.isEmpty() && !isLauncherHost(parentRoot)) {
-            sNavigationState.currentMode = TvNavigationMode.CONTENT_LOCKDOWN;
-            sNavigationState.currentContentRoot = parentRoot;
-            if (targetRoot.equals(parentRoot)) {
-                sNavigationState.lastDecisionReason = "content-lockdown-same-root";
-                return isNewWindow ? PopupDecision.LOAD_CURRENT_TAB : PopupDecision.ALLOW;
-            }
-            sNavigationState.lastDecisionReason = isNewWindow
-                    ? "content-host-cross-root-new-window"
-                    : "content-host-cross-root-same-tab-redirect";
+        // --- Gate 3: about:blank trampolines are always blocked ---
+        if (isAboutBlank(targetUrl)) {
+            KeenRiskScorer.signalAboutBlankTrampoline(parentRoot);
+            sNavigationState.lastDecisionReason = "about-blank-trampoline";
+            KeenDebugLog.blocked(parentRoot, "about:blank trampoline", "about-blank-trampoline", riskScore);
             return PopupDecision.BLOCK;
         }
 
+        // --- Gate 4: Android intent/market scheme firewall ---
+        if (isIntentScheme(targetUrl)) {
+            KeenRiskScorer.signalIntentEscape(parentRoot);
+            if (explicitVisibleAnchor && hasUserGesture) {
+                // Visible user-chosen app link — redirect in current tab (let system handle)
+                sNavigationState.lastDecisionReason = "intent-visible-user-choice";
+                KeenDebugLog.redirected(parentRoot, "intent://", "intent-visible-user-choice", riskScore);
+                return PopupDecision.LOAD_CURRENT_TAB;
+            }
+            sNavigationState.lastDecisionReason = "intent-escape-blocked";
+            KeenDebugLog.blocked(parentRoot, "intent://", "intent-escape-blocked", riskScore);
+            return PopupDecision.BLOCK;
+        }
+
+        // --- Gate 5: auth host exception ---
+        if (isAuthHost(targetRoot)) {
+            sNavigationState.lastDecisionReason = "auth-host-exception";
+            KeenDebugLog.allowed(parentRoot, "auth-host", "auth-host-exception", riskScore);
+            return PopupDecision.LOAD_CURRENT_TAB;
+        }
+
+        // --- Gate 6: app-initiated navigation (chrome://, brave://, initial load) ---
         if (appInitiatedNavigation) {
             sNavigationState.currentMode = TvNavigationMode.CONTENT_LOCKDOWN;
             sNavigationState.currentContentRoot = targetRoot;
             sNavigationState.lastDecisionReason = "app-initiated-navigation";
+            KeenDebugLog.allowed(parentRoot, "app-initiated", "app-initiated-navigation", riskScore);
             return PopupDecision.LOAD_CURRENT_TAB;
         }
 
+        // --- Gate 7: same-site navigation is always allowed ---
+        if (sameSite) {
+            sNavigationState.currentMode = TvNavigationMode.CONTENT_LOCKDOWN;
+            sNavigationState.currentContentRoot = targetRoot;
+            sNavigationState.lastDecisionReason = "same-root-allowed";
+            KeenDebugLog.allowed(parentRoot, sameSite ? "same-site" : "cross-site", "same-root-allowed", riskScore);
+            return isNewWindow ? PopupDecision.LOAD_CURRENT_TAB : PopupDecision.ALLOW;
+        }
+
+        // --- Gate 8: launcher host navigating outward ---
+        if (isLauncherHost(parentRoot)) {
+            if (explicitVisibleAnchor || hasUserGesture) {
+                sNavigationState.currentMode = TvNavigationMode.CONTENT_LOCKDOWN;
+                sNavigationState.currentContentRoot = targetRoot;
+                sNavigationState.lastDecisionReason = explicitVisibleAnchor
+                        ? "launcher-explicit-anchor" : "launcher-user-gesture";
+                KeenDebugLog.redirected(parentRoot, "launcher-outbound", sNavigationState.lastDecisionReason, riskScore);
+                return PopupDecision.LOAD_CURRENT_TAB;
+            }
+            sNavigationState.lastDecisionReason = "launcher-blocked-non-anchor";
+            KeenDebugLog.blocked(parentRoot, "launcher-non-anchor", "launcher-blocked-non-anchor", riskScore);
+            return PopupDecision.BLOCK;
+        }
+
+        // --- Gate 9: navigating back to a launcher host ---
         if (isLauncherHost(targetRoot)) {
             sNavigationState.currentMode = TvNavigationMode.LAUNCHER;
             sNavigationState.currentContentRoot = "";
             sNavigationState.lastDecisionReason = "navigate-to-launcher";
+            KeenDebugLog.allowed(parentRoot, "to-launcher", "navigate-to-launcher", riskScore);
             return isNewWindow ? PopupDecision.LOAD_CURRENT_TAB : PopupDecision.ALLOW;
         }
 
-        if (isLauncherHost(parentRoot)
-                && sNavigationState.currentMode == TvNavigationMode.CONTENT_LOCKDOWN
-                && targetRoot.equals(sNavigationState.currentContentRoot)) {
-            sNavigationState.lastDecisionReason = "launcher-approved-current-tab-handoff";
+        // --- Gate 10: RISK-SCORED cross-site decisions ---
+        // This is the core firewall logic replacing the old absolute lockdown.
+        riskScore = KeenRiskScorer.getScore(parentRoot);
+
+        // NORMAL (0–3): allow visible cross-site links, force into current tab
+        if (riskScore < KeenRiskScorer.LEVEL_WATCH) {
+            if (explicitVisibleAnchor || hasUserGesture) {
+                sNavigationState.currentMode = TvNavigationMode.CONTENT_LOCKDOWN;
+                sNavigationState.currentContentRoot = targetRoot;
+                sNavigationState.lastDecisionReason = "cross-site-normal-visible";
+                KeenDebugLog.redirected(parentRoot, "cross-site-visible", "cross-site-normal-visible", riskScore);
+                return PopupDecision.LOAD_CURRENT_TAB;
+            }
+            // No visible intent but low risk — still block hidden actions
+            if (isNewWindow) {
+                KeenRiskScorer.signalCrossSitePopupHidden(parentRoot);
+                sNavigationState.lastDecisionReason = "cross-site-normal-hidden-popup";
+                KeenDebugLog.blocked(parentRoot, "cross-site-hidden-popup", "cross-site-normal-hidden-popup", riskScore);
+                return PopupDecision.BLOCK;
+            }
+            // Same-tab redirect without gesture at low risk — allow cautiously
+            sNavigationState.currentMode = TvNavigationMode.CONTENT_LOCKDOWN;
+            sNavigationState.currentContentRoot = targetRoot;
+            sNavigationState.lastDecisionReason = "cross-site-normal-redirect";
+            KeenDebugLog.allowed(parentRoot, "cross-site-redirect", "cross-site-normal-redirect", riskScore);
             return PopupDecision.ALLOW;
         }
 
-        if (sNavigationState.currentMode == TvNavigationMode.LAUNCHER || isLauncherHost(parentRoot)) {
-            if (explicitVisibleAnchor || (isNewWindow && hasUserGesture)) {
+        // WATCH (4–6): allow visible links, block hidden
+        if (riskScore < KeenRiskScorer.LEVEL_RESTRICT) {
+            if (explicitVisibleAnchor) {
                 sNavigationState.currentMode = TvNavigationMode.CONTENT_LOCKDOWN;
                 sNavigationState.currentContentRoot = targetRoot;
-                sNavigationState.lastDecisionReason = explicitVisibleAnchor
-                        ? "launcher-explicit-anchor-navigation"
-                        : "launcher-user-selected-new-window";
+                sNavigationState.lastDecisionReason = "cross-site-watch-visible-anchor";
+                KeenDebugLog.redirected(parentRoot, "cross-site-visible", "cross-site-watch-visible-anchor", riskScore);
                 return PopupDecision.LOAD_CURRENT_TAB;
             }
-
-            sNavigationState.lastDecisionReason = "launcher-blocked-non-anchor";
+            sNavigationState.lastDecisionReason = "cross-site-watch-blocked";
+            KeenDebugLog.blocked(parentRoot, "cross-site-watch", "cross-site-watch-blocked", riskScore);
+            sFeedback.showBlocked("Navigation restricted");
             return PopupDecision.BLOCK;
         }
 
-        if (sNavigationState.currentMode == TvNavigationMode.CONTENT_LOCKDOWN) {
-            if (targetRoot.equals(sNavigationState.currentContentRoot)) {
-                sNavigationState.lastDecisionReason = "content-lockdown-same-root";
-                return isNewWindow ? PopupDecision.LOAD_CURRENT_TAB : PopupDecision.ALLOW;
+        // RESTRICT (7–10): block popups, block cross-site unless explicit visible anchor
+        if (riskScore < KeenRiskScorer.LEVEL_STRICT) {
+            if (explicitVisibleAnchor && !isNewWindow) {
+                sNavigationState.currentMode = TvNavigationMode.CONTENT_LOCKDOWN;
+                sNavigationState.currentContentRoot = targetRoot;
+                sNavigationState.lastDecisionReason = "cross-site-restrict-visible-same-tab";
+                KeenDebugLog.redirected(parentRoot, "cross-site-restrict-visible", "cross-site-restrict-visible-same-tab", riskScore);
+                return PopupDecision.ALLOW;
             }
-
-            sNavigationState.lastDecisionReason = "content-host-cross-root-new-window";
+            sNavigationState.lastDecisionReason = "cross-site-restrict-blocked";
+            KeenDebugLog.blocked(parentRoot, "cross-site-restrict", "cross-site-restrict-blocked", riskScore);
+            sFeedback.showBlocked("Site restricted");
             return PopupDecision.BLOCK;
         }
 
-        sNavigationState.lastDecisionReason = "suspicious-block-default";
+        // STRICT (11+): block all non-same-origin
+        sNavigationState.lastDecisionReason = "cross-site-strict-blocked";
+        KeenDebugLog.blocked(parentRoot, "cross-site-strict", "cross-site-strict-blocked", riskScore);
+        sFeedback.showBlocked("Site blocked");
         return PopupDecision.BLOCK;
     }
 
@@ -414,23 +435,36 @@ public final class TvPopupBlocker {
         }
     }
 
+    private static boolean isAboutBlank(String url) {
+        if (url == null) return false;
+        String lower = url.trim().toLowerCase(Locale.ROOT);
+        return lower.equals("about:blank") || lower.startsWith("about:blank?") || lower.startsWith("about:blank#");
+    }
+
+    private static boolean isIntentScheme(String url) {
+        if (url == null) return false;
+        String lower = url.trim().toLowerCase(Locale.ROOT);
+        return lower.startsWith("intent://") || lower.startsWith("market://") || lower.startsWith("android-app://");
+    }
+
     public static void injectDomScrubber(Object webContents) {
         if (webContents == null) {
             return;
         }
         try {
+            String prelude = KeenScriptPrelude.generate();
             java.lang.reflect.Method[] methods = webContents.getClass().getMethods();
             for (java.lang.reflect.Method m : methods) {
                 if (m.getName().equals("evaluateJavaScript") || m.getName().equals("c0")) {
                     Class<?>[] params = m.getParameterTypes();
                     if (params.length == 2 && params[0] == String.class) {
-                        m.invoke(webContents, DOM_SCRUBBER_JS, null);
+                        m.invoke(webContents, prelude, null);
                         break;
                     }
                 }
             }
         } catch (Exception e) {
-            Log.e("TVPopupBlocker", "Failed to inject DOM rewriter script: " + e.getMessage());
+            Log.e("TVPopupBlocker", "Failed to inject firewall prelude: " + e.getMessage());
         }
     }
 
@@ -466,6 +500,12 @@ public final class TvPopupBlocker {
                 sNavigationState.currentContentRoot = hostRoot;
                 Log.i("TVPopupBlocker", "Main frame navigation finished: URL=" + url + " -> mode=CONTENT_LOCKDOWN, root=" + hostRoot);
             }
+
+            // Notify back-trap detector of navigation completion
+            TvCursorController.notifyNavigationFinished(url);
+
+            // Decay risk scores on each navigation to prevent permanent escalation
+            KeenRiskScorer.decayAll();
         } catch (Throwable e) {
             Log.e("TVPopupBlocker", "Error in onMainFrameNavigationFinished: " + e.getMessage(), e);
         }

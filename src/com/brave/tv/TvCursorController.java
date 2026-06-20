@@ -30,7 +30,29 @@ public final class TvCursorController {
     private static final WeakHashMap<View, Boolean> ATTACHED_POPUPS = new WeakHashMap<>();
     private static boolean sLongPressHandled = false;
 
+    // Back-button trap detection state
+    private static String sBackTrapOrigin = "";
+    private static int sBackTrapCount = 0;
+    private static long sLastBackTime = 0;
+    private static final int BACK_TRAP_THRESHOLD = 3;
+    private static final long BACK_TRAP_WINDOW_MS = 5000;
+
     private TvCursorController() {}
+
+    /**
+     * Called by TvPopupBlocker after a navigation completes so we can
+     * detect whether a Back press actually changed the origin.
+     */
+    public static void notifyNavigationFinished(String url) {
+        String origin = extractRootDomain(url);
+        if (!origin.isEmpty() && origin.equals(sBackTrapOrigin)) {
+            // Back didn't leave this origin. Already counted by handleBack.
+        } else {
+            // Origin changed — reset trap counter.
+            sBackTrapOrigin = origin;
+            sBackTrapCount = 0;
+        }
+    }
 
     public static boolean handle(Activity activity, KeyEvent event) {
         if (!isTelevision(activity)) return false;
@@ -53,7 +75,7 @@ public final class TvCursorController {
             return true;
         }
 
-        // Back is available on the Mi Box remote and does not conflict with clicking.
+        // Back button: long-press toggles cursor, short-press detects history traps.
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             if (event.getAction() == KeyEvent.ACTION_DOWN) {
                 if (event.getRepeatCount() == 0) {
@@ -72,6 +94,8 @@ public final class TvCursorController {
                     sLongPressHandled = false;
                     return true;
                 }
+                // Track consecutive Back presses that fail to leave the origin
+                trackBackTrap(activity);
             }
         }
 
@@ -152,6 +176,44 @@ public final class TvCursorController {
         int type = activity.getResources().getConfiguration().uiMode
                 & Configuration.UI_MODE_TYPE_MASK;
         return type == Configuration.UI_MODE_TYPE_TELEVISION;
+    }
+
+    private static void trackBackTrap(Activity activity) {
+        long now = System.currentTimeMillis();
+        if (now - sLastBackTime > BACK_TRAP_WINDOW_MS) {
+            sBackTrapCount = 0;
+        }
+        sLastBackTime = now;
+        sBackTrapCount++;
+
+        if (sBackTrapCount >= BACK_TRAP_THRESHOLD) {
+            // The user has pressed Back N times within the window
+            // and the origin hasn't changed — this is a history trap.
+            KeenRiskScorer.signalBackTrap(sBackTrapOrigin);
+            KeenDebugLog.blocked(sBackTrapOrigin, "back-trap",
+                    "back-trap-" + sBackTrapCount + "-presses", KeenRiskScorer.getScore(sBackTrapOrigin));
+            Toast.makeText(activity,
+                    "Site is trapping Back button. Long-press Back to toggle mouse, or press Home.",
+                    Toast.LENGTH_LONG).show();
+            sBackTrapCount = 0;
+        }
+    }
+
+    /** Extracts root domain from a URL for back-trap origin tracking. */
+    private static String extractRootDomain(String url) {
+        if (url == null) return "";
+        try {
+            android.net.Uri uri = android.net.Uri.parse(url);
+            String host = uri.getHost();
+            if (host == null) return "";
+            host = host.toLowerCase(java.util.Locale.ROOT).trim();
+            if (host.startsWith("www.")) host = host.substring(4);
+            String[] parts = host.split("\\.");
+            if (parts.length < 2) return host;
+            return parts[parts.length - 2] + "." + parts[parts.length - 1];
+        } catch (Exception e) {
+            return "";
+        }
     }
 
     private static boolean isDirection(int keyCode) {
