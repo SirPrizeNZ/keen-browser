@@ -354,5 +354,48 @@ def main():
     )
     apply_replacement(controller_path, controller_target, controller_replacement)
 
+    # 9. Patch s68.smali (d method NullPointerException mitigation)
+    s68_path = os.path.join(
+        APKTOOL_TREE,
+        "smali_classes2",
+        "s68.smali"
+    )
+    s68_target = (
+        ".method public final d(Lorg/chromium/url/GURL;Lf16;)V\n"
+        "    .locals 3\n"
+        "\n"
+        "    .line 1\n"
+        "    iget-boolean v0, p2, Lf16;->m:Z"
+    )
+    s68_replacement = (
+        ".method public final d(Lorg/chromium/url/GURL;Lf16;)V\n"
+        "    .locals 3\n"
+        "\n"
+        "    .line 1\n"
+        "    if-eqz p2, :cond_not_null\n"
+        "\n"
+        "    # Fallback if f16 parameter is null to prevent NullPointerException\n"
+        "    new-instance v0, Lorg/chromium/content_public/browser/LoadUrlParams;\n"
+        "    const/4 v2, 0x0\n"
+        "    invoke-direct {v0, v2, p1}, Lorg/chromium/content_public/browser/LoadUrlParams;-><init>(ILorg/chromium/url/GURL;)V\n"
+        "    invoke-static {}, Lorg/chromium/url/Origin;->a()Lorg/chromium/url/Origin;\n"
+        "    move-result-object p1\n"
+        "    iput-object p1, v0, Lorg/chromium/content_public/browser/LoadUrlParams;->b:Lorg/chromium/url/Origin;\n"
+        "    new-instance p1, Lq68;\n"
+        "    invoke-direct {p1}, Ljava/lang/Object;-><init>()V\n"
+        "    iput-object v0, p1, Lq68;->q:Lorg/chromium/content_public/browser/LoadUrlParams;\n"
+        "    iput-object p0, p1, Lq68;->s:Ls68;\n"
+        "    const/4 p2, 0x7\n"
+        "    invoke-static {p2, p1}, Lorg/chromium/base/task/PostTask;->c(ILjava/lang/Runnable;)V\n"
+        "    const/4 p1, 0x1\n"
+        "    iput-boolean p1, p0, Ls68;->g:Z\n"
+        "    return-void\n"
+        "\n"
+        "    :cond_not_null\n"
+        "    iget-boolean v0, p2, Lf16;->m:Z"
+    )
+    apply_replacement(s68_path, s68_target, s68_replacement)
+
 if __name__ == "__main__":
     main()
+
