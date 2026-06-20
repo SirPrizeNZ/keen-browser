@@ -21,19 +21,12 @@ Brave is a great privacy-focused browser, but it lacks an official Android TV ap
 
 ---
 
-## Device compatibility
+## Device compatibility and downloads
 
-| Architecture support | Device classification examples |
-| :--- | :--- |
-| 64-bit version (arm64-v8a) | Nvidia Shield TV Pro (2019+), Google TV Streamer (4K) |
-| 32-bit version (armeabi-v7a) | Xiaomi TV Box S (Gen 2 & Gen 3), Walmart Onn 4K Pro, Chromecast with Google TV (4K & HD), Nvidia Shield TV (Tube version), Walmart Onn 4K Streaming Box |
-
----
-
-## Download
-
-- **[64-bit version (arm64-v8a)](https://github.com/SirPrizeNZ/keen-browser/releases/download/v1.3.0/Keen-64.apk)** - Recommended for modern, high-performance devices.
-- **[32-bit version (armeabi-v7a)](https://github.com/SirPrizeNZ/keen-browser/releases/download/v1.3.0/Keen-32.apk)** - Compatibility release for older streaming hardware and sticks.
+| Architecture | Download link | Device classification examples |
+| :--- | :--- | :--- |
+| **64-bit** (arm64-v8a) | [Keen-64.apk](https://github.com/SirPrizeNZ/keen-browser/releases/download/v1.3.0/Keen-64.apk) | Nvidia Shield TV Pro (2019+), Google TV Streamer (4K) |
+| **32-bit** (armeabi-v7a) | [Keen-32.apk](https://github.com/SirPrizeNZ/keen-browser/releases/download/v1.3.0/Keen-32.apk) | Xiaomi TV Box S (Gen 2 & Gen 3), Walmart Onn 4K Pro, Chromecast with Google TV (4K & HD), Nvidia Shield TV (Tube version), Walmart Onn 4K Streaming Box |
 
 ---
 
