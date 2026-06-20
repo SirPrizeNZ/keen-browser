@@ -40,25 +40,7 @@ public final class KeenScriptPrelude {
         "  if (window.__KEEN_FIREWALL__) return;" +
         "  window.__KEEN_FIREWALL__ = true;" +
 
-        // ---- Kill notification prompts ----
-        // Override the Notification API so the browser never shows the
-        // "X wants to send you notifications" prompt. Auto-deny silently.
-        "  try {" +
-        "    Object.defineProperty(Notification, 'permission', {" +
-        "      get: function() { return 'denied'; }," +
-        "      configurable: false" +
-        "    });" +
-        "    Notification.requestPermission = function(cb) {" +
-        "      if (typeof cb === 'function') cb('denied');" +
-        "      return Promise.resolve('denied');" +
-        "    };" +
-        "    window.Notification = function() { throw new TypeError('Notifications are disabled'); };" +
-        "    window.Notification.permission = 'denied';" +
-        "    window.Notification.requestPermission = function(cb) {" +
-        "      if (typeof cb === 'function') cb('denied');" +
-        "      return Promise.resolve('denied');" +
-        "    };" +
-        "  } catch(e) {}" +
+
 
         // ---- State ----
         "  var lastUserGestureTime = 0;" +
