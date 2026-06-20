@@ -372,7 +372,7 @@ def main():
         "    .locals 3\n"
         "\n"
         "    .line 1\n"
-        "    if-eqz p2, :cond_not_null\n"
+        "    if-nez p2, :cond_not_null\n"
         "\n"
         "    # Fallback if f16 parameter is null to prevent NullPointerException\n"
         "    new-instance v0, Lorg/chromium/content_public/browser/LoadUrlParams;\n"
