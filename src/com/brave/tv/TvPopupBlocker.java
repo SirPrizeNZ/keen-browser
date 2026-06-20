@@ -549,12 +549,13 @@ public final class TvPopupBlocker {
             if (permissions != null) {
                 for (int p : permissions) {
                     Log.i("TVPopupBlocker", "PermissionDialog requested content setting type: " + p);
-                    if (p == 2) { // 2 = ContentSettingsType.NOTIFICATIONS
+                    if (p == 6 || p == 2) { // 6 or 2 = ContentSettingsType.NOTIFICATIONS
                         Log.i("TVPopupBlocker", "Blocking notification permission dialog request");
                         java.lang.reflect.Field nativeDelegateField = delegate.getClass().getField("f");
                         long nativePtr = nativeDelegateField.getLong(delegate);
                         if (nativePtr != 0) {
-                            java.lang.reflect.Method vijMethod = Class.forName("LJ.N").getMethod("VIJ", int.class, int.class, long.class);
+                            Class<?> jnClass = delegate.getClass().getClassLoader().loadClass("J.N");
+                            java.lang.reflect.Method vijMethod = jnClass.getMethod("VIJ", int.class, int.class, long.class);
                             // 56 is onClicked method ID, 1 is DENIED (Deny decision)
                             vijMethod.invoke(null, 56, 1, nativePtr);
                             Log.i("TVPopupBlocker", "Natively denied notification permission dialog for ptr: " + nativePtr);
