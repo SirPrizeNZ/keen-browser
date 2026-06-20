@@ -104,6 +104,36 @@ Compiling Chromium and Brave from source requires a high-end machine, hundreds o
 
 ---
 
+## Navigation protection & permission firewall
+
+Keen integrates a multi-layered firewall to protect Android TV users from malicious redirects, back-button hijacks, and annoying overlays.
+
+```mermaid
+flowchart TD
+    Trigger([Web Site Action / Request]) --> Choice{Action Type}
+    
+    %% Branch A: Navigation / Popups
+    Choice -->|Navigation / Popup| JSMembrane[JS Prelude Membrane]
+    JSMembrane -->|Validate Gesture & Target| JSFilter{Check Gesture & Host}
+    JSFilter -->|Threat / No Gesture| BlockJS[Block Action + Escalate Risk Score]
+    JSFilter -->|Valid| NativeDecide[Native decideNavigation Gate Pipeline]
+    
+    Choice -->|Link Navigation| NativeDecide
+    
+    NativeDecide --> RiskCheck{Assess Risk Score & Host Match}
+    RiskCheck -->|Threat Level Strict/Block| BlockNav[Cancel Navigation / Toast Warning]
+    RiskCheck -->|Threat Level Normal/Allowed| AllowNav[Execute Safe Navigation]
+    
+    %% Branch B: Permissions
+    Choice -->|Permission Request| PermController[PermissionDialogController]
+    PermController --> Hook[TvPopupBlocker.shouldShowPermissionDialog]
+    Hook --> CheckType{Is NOTIFICATIONS type 6?}
+    CheckType -->|No| AllowDialog[Delegate to Original Dialog Queue]
+    CheckType -->|Yes| SilentDeny["1. Silent JNI Denial via J.N.onClicked\n2. Block Dialog Queue Insertion"]
+```
+
+---
+
 ## Building from source
 
 ### Prerequisites
