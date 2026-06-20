@@ -8,91 +8,106 @@
 
 Keen is Brave Browser rebuilt for Android TV.
 
-Brave is a great privacy-focused browser, but it doesn't have an official app for Android TV. Keen fixes that by adding TV remote navigation and cleaning up the layout for the big screen, all while keeping Brave's ad-blocking and privacy features intact.
+Brave is a great privacy-focused browser, but it lacks an official Android TV app. Keen resolves this by integrating D-pad remote navigation and optimizing the layout for television displays, while keeping Brave's ad-blocking and privacy features intact.
 
 ---
 
 ## Features
 
-- D-pad pointer with smooth movement, matched edge scrolling, and keyboard-aware input.
-- Content-host lockdown blocks hijacked popups and unrelated full-page redirects.
+- D-pad pointer with smooth movement, edge scrolling, and keyboard-aware input.
+- Content-host lockdown blocking hijacked popups and unrelated full-page redirects.
 - Remote-native Android dialogs and controls.
-- Brave Shields and native ad blocking remain intact.
+- Brave Shields and native ad blocking remain fully intact.
 
 ---
 
 ## Download
 
-[Download Keen.apk (v1.2.2-alpha - 2026-06-19)](https://github.com/SirPrizeNZ/keen-browser/releases/download/v1.2.2-alpha/Keen.apk)
+- **[64-bit version (arm64-v8a)](https://github.com/SirPrizeNZ/keen-browser/releases/download/v1.3.0/Keen-64.apk)** - Recommended for modern, high-performance devices.
+- **[32-bit version (armeabi-v7a)](https://github.com/SirPrizeNZ/keen-browser/releases/download/v1.3.0/Keen-32.apk)** - Compatibility release for older streaming hardware and sticks.
 
 ---
 
-## Compatibility & Specs
+## Device compatibility
 
-- **Status**: Alpha / Experimental (Concept Build)
-- **Tested on**: Xiaomi TV Box S (2nd Gen) - Android 14
-- **Base APK**: Brave Stable `v1.91.172` (`com.brave.browser` - Monoarm armeabi-v7a)
-  - *SHA-256*: `39c8fd9eb90a1b8e10a030ed9c682f6637bb71ea45bb2c11dd3e6e47055fab39`
-- **Keen APK**: 
-  - *SHA-256*: `e02022d1186794c54515d23cce2ef007bfbd73e4f5322b253d8c2dde77e9bf25`
+| Architecture support | Device classification examples |
+| :--- | :--- |
+| 64-bit version (arm64-v8a) | Nvidia Shield TV Pro (2019+), Google TV Streamer (4K) |
+| 32-bit version (armeabi-v7a) | Xiaomi TV Box S (Gen 2 & Gen 3), Walmart Onn 4K Pro, Chromecast with Google TV (4K & HD), Nvidia Shield TV (Tube version), Walmart Onn 4K Streaming Box |
 
 ---
 
-## Technical Overview
+## Technical specifications
 
-### What Changed
+- **Status**: Alpha / Experimental
+- **Base APK version**: Brave Stable `v1.91.172` (`com.brave.browser`)
+
+---
+
+## Technical overview
+
+### Modifications
 - **D-pad cursor**: Native pointer simulation mapped directly to your D-pad remote.
-- **TV launcher banner**: Natively integrated Leanback launcher category and custom TV banner resources.
-- **UI cleanup**: Stripped out mobile-only menu items (Brave Rewards, News, VPN, Wallet, Leo AI) to prevent D-pad remote focus hangs.
+- **TV launcher banner**: Integrated Leanback launcher category and custom TV banner resources.
+- **UI cleanups**: Stripped out mobile-only menu items (Brave Rewards, News, VPN, Wallet, Leo AI) to prevent D-pad remote focus hangs.
 - **Navigation lockdown**: Content sites stay on their own host. Cross-site popup hijacks are blocked at Chromium's native navigation hooks.
 
-### What Did Not Change
+### Unmodified features
 - Core Chromium rendering engine.
-- Brave Shields and native adblock lists.
+- Brave Shields and native ad-block lists.
 
-### Key Permissions
+### Key permissions
 - `INTERNET` (Web access)
 - `ACCESS_NETWORK_STATE` & `ACCESS_WIFI_STATE` (Connection checks)
 - `READ_EXTERNAL_STORAGE` & `WRITE_EXTERNAL_STORAGE` (Downloads support)
 - `RECORD_AUDIO` & `CAMERA` (Web audio/video features)
 
-### Known Issues
+### Known limitations
 - **Manual updates**: Since this is a custom patched build, it won't auto-update from the Play Store.
 - **Custom signing**: Will trigger an Android security warning on installation.
-- **Limited device testing**: Only verified on Xiaomi TV Box S (2nd Gen) running Android 14.
 
 ---
 
-## How to Install (Android TV)
+## How to install (Android TV)
 
-1. Download the Keen.apk onto your phone or computer.
+1. Download the correct version of Keen for your TV device on a phone or computer.
 2. Send the APK file to your TV using a USB drive or an app like Send Files to TV.
-3. On your TV, open a File Manager app, find Keen.apk, and install it. You may need to allow "Install from Unknown Sources" in your TV's settings.
+3. On your TV, open a File Manager app, find the APK, and install it. Allow installation from unknown sources in settings if prompted.
 
 ---
 
-## Security & Privacy Note
+## Security and privacy policy
 
-- **Untouched Core**: All patches are strictly for UI layout, D-pad controls, and TV optimization. Brave's core Chromium engine, sandboxing, and native ad-blocking (Brave Shields) are completely untouched.
-- Because this is a modified build, it is signed with a custom certificate instead of Brave's official signature. This means it will not auto-update via the Google Play Store; updates must be installed manually.
+All patches are strictly for UI layout, D-pad controls, and TV optimization. Brave's core Chromium engine, sandboxing, and native adblockers are untouched.
+
+Because this is a modified build, it is signed with a custom development certificate instead of Brave's official signature.
 
 ---
 
-## How It Works (Technical Approach)
+## System architecture and patching pipeline
+
+The project uses a patching pipeline to inject TV behavior into the official Brave build, bypassing the need to maintain a heavy Chromium source fork.
+
+```mermaid
+flowchart TD
+    A[Official Brave APK] -->|apktool decompile| B[Smali & Assets Directory]
+    B -->|apply-smali-patches.py| C[Patched Smali Sources]
+    D[src/com/brave/tv/ java source] -->|javac & d8| E[Custom Dex Classes]
+    E -->|baksmali| F[smali_classes3 Source]
+    C --> G[Rebuild Package]
+    F --> G
+    G -->|apktool build| H[Unsigned Base APK]
+    H -->|APKEditor XML/branding| I[Branded Base APK]
+    I -->|zipalign & apksigner| J[Signed Keen APK]
+    J -->|verify-build.py| K[Release Assets]
+```
 
 ### Why this isn't a source fork
-Compiling Chromium and Brave from source is a massive headache. It requires a powerful machine, hundreds of gigabytes of disk space, and takes hours to build just one update. Keeping it updated with upstream security patches is also a lot of work for a solo developer.
-
-Instead, Keen uses a **patching pipeline**:
-1. We decompile Brave's official APK using `apktool`.
-2. We inject custom Java classes (for the virtual cursor, popup blocker, etc.) directly into the decompiled code.
-3. We override Brave's layout settings and visibility checks in smali to hide mobile-only features (VPN, Wallet, Rewards, News, and Leo AI).
-4. We swap in the new branding assets, register `@mipmap/banner` in `public.xml`, and add the `LEANBACK_LAUNCHER` intent category directly in the `AndroidManifest.xml`.
-5. We pack it all back up and sign the APK.
+Compiling Chromium and Brave from source requires a high-end machine, hundreds of gigabytes of disk space, and takes hours per build. Keeping it updated with upstream security patches is also difficult. The patching pipeline automates the modification of official upstream binaries, keeping the browser secure with minimal overhead.
 
 ---
 
-## Building from Source
+## Building from source
 
 ### Prerequisites
 - macOS or Linux
@@ -102,15 +117,18 @@ Instead, Keen uses a **patching pipeline**:
 - Node.js
 - `apktool` installed on your PATH
 
-### Build Instructions
+### Build instructions
 
-1. Place the original Brave APK (named `BraveMonoarm.apk`) in the `original/` folder.
+1. Place the original Brave APKs inside the `original/` folder:
+   - 32-bit: `original/BraveMonoarm.apk`
+   - 64-bit: `original/BraveMonoarm64.apk`
 2. Run the build script:
    ```bash
    ./tools/build-patch.sh
    ```
-3. Get your finished APK from the `build/` folder:
-   - `build/Keen.apk`
+3. Find your finished APKs in the `build/` folder:
+   - `build/Keen-32.apk`
+   - `build/Keen-64.apk`
 
 ---
 
@@ -118,4 +136,5 @@ Instead, Keen uses a **patching pipeline**:
 
 Built by **SirPrizeNZ** (https://github.com/SirPrizeNZ).
 
-*Disclaimer: This is an unofficial community port of Brave Browser. It is not affiliated with or endorsed by Brave Software Inc. Brave, if you are reading this, please release an official Android TV compatible version.*
+*Disclaimer: Unofficial community port of Brave Browser. Not affiliated with or endorsed by Brave Software Inc.*
+
