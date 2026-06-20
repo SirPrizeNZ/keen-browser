@@ -16,6 +16,8 @@ Brave is a great privacy-focused browser, but it lacks an official Android TV ap
 
 - D-pad pointer with smooth movement, edge scrolling, and keyboard-aware input.
 - Content-host lockdown blocking hijacked popups and unrelated full-page redirects.
+- Intent Firewall for risk-scored capability protection.
+- Native notification permission dialog auto-denial (globally suppressed).
 - Remote-native Android dialogs and controls.
 - Brave Shields and native ad blocking remain fully intact.
 
@@ -25,8 +27,8 @@ Brave is a great privacy-focused browser, but it lacks an official Android TV ap
 
 | Architecture | Download link | Device classification examples |
 | :--- | :--- | :--- |
-| **64-bit** (arm64-v8a) | [Keen-64.apk](https://github.com/SirPrizeNZ/keen-browser/releases/download/v1.3.0/Keen-64.apk) | Nvidia Shield TV Pro (2019+), Google TV Streamer (4K) |
-| **32-bit** (armeabi-v7a) | [Keen-32.apk](https://github.com/SirPrizeNZ/keen-browser/releases/download/v1.3.0/Keen-32.apk) | Xiaomi TV Box S (Gen 2 & Gen 3), Walmart Onn 4K Pro, Chromecast with Google TV (4K & HD), Nvidia Shield TV (Tube version), Walmart Onn 4K Streaming Box |
+| **64-bit** (arm64-v8a) | [Keen-64.apk](https://github.com/SirPrizeNZ/keen-browser/releases/download/v1.4.0/Keen-64.apk) | Nvidia Shield TV Pro (2019+), Google TV Streamer (4K) |
+| **32-bit** (armeabi-v7a) | [Keen-32.apk](https://github.com/SirPrizeNZ/keen-browser/releases/download/v1.4.0/Keen-32.apk) | Xiaomi TV Box S (Gen 2 & Gen 3), Walmart Onn 4K Pro, Chromecast with Google TV (4K & HD), Nvidia Shield TV (Tube version), Walmart Onn 4K Streaming Box |
 
 ---
 
@@ -42,8 +44,10 @@ Brave is a great privacy-focused browser, but it lacks an official Android TV ap
 ### Modifications
 - **D-pad cursor**: Native pointer simulation mapped directly to your D-pad remote.
 - **TV launcher banner**: Integrated Leanback launcher category and custom TV banner resources.
-- **UI cleanups**: Stripped out mobile-only menu items (Brave Rewards, News, VPN, Wallet, Leo AI) to prevent D-pad remote focus hangs.
+- **UI cleanups**: Stripped out features (Brave Rewards, News, VPN, Wallet, Leo AI) to prevent D-pad remote focus hangs.
 - **Navigation lockdown**: Content sites stay on their own host. Cross-site popup hijacks are blocked at Chromium's native navigation hooks.
+- **Intent Firewall**: System capability filtering based on risk-scored matching.
+- **Global notification blocking**: Silently auto-denies site notification permission dialogs at the native Chromium level.
 
 ### Unmodified features
 - Core Chromium rendering engine.

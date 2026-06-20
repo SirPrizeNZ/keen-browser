@@ -240,7 +240,7 @@ def main():
     )
     apply_replacement(t82_path, t82_target, t82_replacement)
 
-    # 5c. Patch n92.smali to truncate e() method (removes mobile-only menu items)
+    # 5c. Patch n92.smali to truncate e() method (removes menu items)
     v82_path = os.path.join(APKTOOL_TREE, "smali_classes2", "n92.smali")
     v82_target = (
         "    invoke-virtual {v7, v2}, Lx09;->D(Ljava/lang/Object;)V\n"

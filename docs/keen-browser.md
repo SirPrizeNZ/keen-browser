@@ -5,8 +5,8 @@
 Keen Browser is a fork of Brave strictly for Android TVs.
 
 It adds remote-first pointer navigation, matched-speed edge scrolling,
-keyboard-aware input, native dialog control, Android TV launcher support, and
-Keen branding.
+keyboard-aware input, native dialog control, Android TV launcher support,
+an Intent Firewall, global notification suppression, and Keen branding.
 
 Content-host lockdown stops popup and redirect hijacks without blocking video,
 media, CDN, image, script, or iframe resources. Legitimate navigation stays in
