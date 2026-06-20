@@ -549,7 +549,7 @@ public final class TvPopupBlocker {
             if (permissions != null) {
                 for (int p : permissions) {
                     Log.i("TVPopupBlocker", "PermissionDialog requested content setting type: " + p);
-                    if (p == 6 || p == 2) { // 6 or 2 = ContentSettingsType.NOTIFICATIONS
+                    if (p == 6) { // 6 = ContentSettingsType.NOTIFICATIONS
                         Log.i("TVPopupBlocker", "Blocking notification permission dialog request");
                         java.lang.reflect.Field nativeDelegateField = delegate.getClass().getField("f");
                         long nativePtr = nativeDelegateField.getLong(delegate);
