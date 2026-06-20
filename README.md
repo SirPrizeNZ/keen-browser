@@ -25,7 +25,7 @@ Brave is a great privacy-focused browser, but it lacks an official Android TV ap
 
 ## Device compatibility and downloads
 
-| Architecture | Download link | Device classification examples |
+| Architecture | Download | Device classification examples |
 | :--- | :--- | :--- |
 | **64-bit** (arm64-v8a) | [Keen-64.apk](https://github.com/SirPrizeNZ/keen-browser/releases/download/v1.4.0/Keen-64.apk) | Nvidia Shield TV Pro (2019+), Google TV Streamer (4K) |
 | **32-bit** (armeabi-v7a) | [Keen-32.apk](https://github.com/SirPrizeNZ/keen-browser/releases/download/v1.4.0/Keen-32.apk) | Xiaomi TV Box S (Gen 2 & Gen 3), Walmart Onn 4K Pro, Chromecast with Google TV (4K & HD), Nvidia Shield TV (Tube version), Walmart Onn 4K Streaming Box |
