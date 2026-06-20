@@ -3,7 +3,6 @@ import os
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-APKTOOL_TREE = os.path.join(ROOT, "analysis", "apktool-smali")
 
 def apply_replacement(filepath, target, replacement):
     if not os.path.exists(filepath):
@@ -35,6 +34,14 @@ def apply_replacement(filepath, target, replacement):
     print(f"Successfully patched {os.path.basename(filepath)}")
 
 def main():
+    if len(sys.argv) > 1:
+        apktool_dir = sys.argv[1]
+    else:
+        apktool_dir = "apktool-smali-32"
+    
+    APKTOOL_TREE = os.path.join(ROOT, "analysis", apktool_dir)
+    print(f"Applying smali patches to tree: {APKTOOL_TREE}")
+
     # 1. Patch jn3.smali (D-pad key dispatcher hook)
     vm3_path = os.path.join(APKTOOL_TREE, "smali", "jn3.smali")
     vm3_target = (
