@@ -318,7 +318,41 @@ def main():
         "    :cond_hook_bypass\n"
         "    .line 1"
     )
-    apply_replacement(hs1_path, hs1_target, hs1_replacement)
+    # 8. Patch PermissionDialogController.smali (createDialog blocker hook to TvPopupBlocker)
+    controller_path = os.path.join(
+        APKTOOL_TREE,
+        "smali_classes2",
+        "org",
+        "chromium",
+        "components",
+        "permissions",
+        "PermissionDialogController.smali"
+    )
+    controller_target = (
+        ".method public static createDialog(Lorg/chromium/components/permissions/PermissionDialogDelegate;)V\n"
+        "    .locals 2\n"
+        "\n"
+        "    .line 1\n"
+        "    sget-object v0, Ls8c;->a:Lorg/chromium/components/permissions/PermissionDialogController;"
+    )
+    controller_replacement = (
+        ".method public static createDialog(Lorg/chromium/components/permissions/PermissionDialogDelegate;)V\n"
+        "    .locals 2\n"
+        "\n"
+        "    # Hook to TvPopupBlocker.shouldShowPermissionDialog\n"
+        "    invoke-static {p0}, Lcom/brave/tv/TvPopupBlocker;->shouldShowPermissionDialog(Ljava/lang/Object;)Z\n"
+        "\n"
+        "    move-result v0\n"
+        "\n"
+        "    if-nez v0, :cond_allowed\n"
+        "\n"
+        "    return-void\n"
+        "\n"
+        "    :cond_allowed\n"
+        "    .line 1\n"
+        "    sget-object v0, Ls8c;->a:Lorg/chromium/components/permissions/PermissionDialogController;"
+    )
+    apply_replacement(controller_path, controller_target, controller_replacement)
 
 if __name__ == "__main__":
     main()
