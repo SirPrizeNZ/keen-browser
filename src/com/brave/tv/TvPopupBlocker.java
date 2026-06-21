@@ -266,9 +266,8 @@ public final class TvPopupBlocker {
                 KeenDebugLog.redirected(parentRoot, "cross-site-visible", "cross-site-normal-visible", riskScore);
                 return PopupDecision.LOAD_CURRENT_TAB;
             }
-            // No visible intent but low risk — still block hidden actions
+            // Block all new-window/popup navigations unless explicitly triggered by real user interaction
             if (isNewWindow) {
-                KeenRiskScorer.signalCrossSitePopupHidden(parentRoot);
                 sNavigationState.lastDecisionReason = "cross-site-normal-hidden-popup";
                 KeenDebugLog.blocked(parentRoot, "cross-site-hidden-popup", "cross-site-normal-hidden-popup", riskScore);
                 return PopupDecision.BLOCK;
