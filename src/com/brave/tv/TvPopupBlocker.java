@@ -231,18 +231,17 @@ public final class TvPopupBlocker {
         }
 
         // --- Gate 8: launcher host navigating outward ---
+        // Launcher hosts (FMHY, Google, etc.) are trusted directories.
+        // The user explicitly navigated here to find links — all outbound
+        // navigations should be allowed without gesture/anchor proof,
+        // especially since Android TV D-pad clicks don't always register
+        // as Chromium user gestures.
         if (isLauncherHost(parentRoot)) {
-            if (explicitVisibleAnchor || hasUserGesture) {
-                sNavigationState.currentMode = TvNavigationMode.CONTENT_LOCKDOWN;
-                sNavigationState.currentContentRoot = targetRoot;
-                sNavigationState.lastDecisionReason = explicitVisibleAnchor
-                        ? "launcher-explicit-anchor" : "launcher-user-gesture";
-                KeenDebugLog.redirected(parentRoot, "launcher-outbound", sNavigationState.lastDecisionReason, riskScore);
-                return PopupDecision.LOAD_CURRENT_TAB;
-            }
-            sNavigationState.lastDecisionReason = "launcher-blocked-non-anchor";
-            KeenDebugLog.blocked(parentRoot, "launcher-non-anchor", "launcher-blocked-non-anchor", riskScore);
-            return PopupDecision.BLOCK;
+            sNavigationState.currentMode = TvNavigationMode.CONTENT_LOCKDOWN;
+            sNavigationState.currentContentRoot = targetRoot;
+            sNavigationState.lastDecisionReason = "launcher-outbound-allowed";
+            KeenDebugLog.redirected(parentRoot, "launcher-outbound", "launcher-outbound-allowed", riskScore);
+            return isNewWindow ? PopupDecision.LOAD_CURRENT_TAB : PopupDecision.ALLOW;
         }
 
         // --- Gate 9: navigating back to a launcher host ---
