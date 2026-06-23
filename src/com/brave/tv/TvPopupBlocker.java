@@ -71,6 +71,10 @@ public final class TvPopupBlocker {
             if (decision == PopupDecision.BLOCK) {
                 sFeedback.showBlocked("New tab blocked");
                 logBlock(parentSpec, targetSpec, "content-host-cross-root-new-window", true, true, userGesture, explicitVisibleAnchor);
+                
+                // Stop loading indicator on the parent WebContents
+                stopLoading(parentWebContents);
+                
                 return false; // Reject window creation
             }
 
@@ -140,6 +144,10 @@ public final class TvPopupBlocker {
             if (decision == PopupDecision.BLOCK) {
                 sFeedback.showBlocked("Navigation blocked");
                 logBlock(parentUrl, targetUrl, "content-host-cross-root-same-tab-redirect", false, isMainFrame, hasUserGesture, explicitVisibleAnchor);
+
+                // Stop loading indicator on the WebContents
+                Object webContents = getWebContentsFromDelegate(delegate);
+                stopLoading(webContents);
 
                 Class<?> z06Class = Class.forName("z06");
                 java.lang.reflect.Constructor<?> ctor = z06Class.getConstructor(int.class, int.class);
@@ -272,7 +280,13 @@ public final class TvPopupBlocker {
                 KeenDebugLog.blocked(parentRoot, "cross-site-hidden-popup", "cross-site-normal-hidden-popup", riskScore);
                 return PopupDecision.BLOCK;
             }
-            // Same-tab redirect without gesture at low risk — allow cautiously
+            // Block same-tab cross-site redirects that happen without user gesture (ad hijackers)
+            if (!hasUserGesture) {
+                sNavigationState.lastDecisionReason = "cross-site-normal-redirect-blocked";
+                KeenDebugLog.blocked(parentRoot, "cross-site-redirect", "cross-site-normal-redirect-blocked", riskScore);
+                return PopupDecision.BLOCK;
+            }
+            // Same-tab redirect with gesture at low risk — allow cautiously
             sNavigationState.currentMode = TvNavigationMode.CONTENT_LOCKDOWN;
             sNavigationState.currentContentRoot = targetRoot;
             sNavigationState.lastDecisionReason = "cross-site-normal-redirect";
@@ -317,24 +331,45 @@ public final class TvPopupBlocker {
         return PopupDecision.BLOCK;
     }
 
-    private static String getParentUrlFromDelegate(Object delegate) {
+    private static Object getWebContentsFromDelegate(Object delegate) {
+        if (delegate == null) return null;
         try {
             java.lang.reflect.Field aField = delegate.getClass().getField("a");
             Object q06 = aField.get(delegate);
             if (q06 == null) {
-                Log.w("TVPopupBlocker", "getParentUrlFromDelegate: q06 is null");
-                return "";
+                Log.w("TVPopupBlocker", "getWebContentsFromDelegate: q06 is null");
+                return null;
             }
 
             java.lang.reflect.Field tabField = q06.getClass().getField("a");
             Object tab = tabField.get(q06);
             if (tab == null) {
-                Log.w("TVPopupBlocker", "getParentUrlFromDelegate: tab is null");
-                return "";
+                Log.w("TVPopupBlocker", "getWebContentsFromDelegate: tab is null");
+                return null;
             }
 
             java.lang.reflect.Method getWebContentsMethod = tab.getClass().getMethod("getWebContents");
-            Object webContents = getWebContentsMethod.invoke(tab);
+            return getWebContentsMethod.invoke(tab);
+        } catch (Exception e) {
+            Log.e("TVPopupBlocker", "getWebContentsFromDelegate failed", e);
+            return null;
+        }
+    }
+
+    private static void stopLoading(Object webContents) {
+        if (webContents == null) return;
+        try {
+            java.lang.reflect.Method stopMethod = webContents.getClass().getMethod("stop");
+            stopMethod.invoke(webContents);
+            Log.i("TVPopupBlocker", "Successfully called stop() on WebContents");
+        } catch (Exception e) {
+            Log.e("TVPopupBlocker", "Failed to call stop() on WebContents: " + e.getMessage(), e);
+        }
+    }
+
+    private static String getParentUrlFromDelegate(Object delegate) {
+        try {
+            Object webContents = getWebContentsFromDelegate(delegate);
             if (webContents == null) {
                 Log.w("TVPopupBlocker", "getParentUrlFromDelegate: webContents is null");
                 return "";
